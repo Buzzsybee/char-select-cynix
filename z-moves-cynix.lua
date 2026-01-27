@@ -37,8 +37,8 @@ local function act_cyn_run(m)
 
     vec3f_copy(startPos, m.pos);
     update_cyn_run_speed(m);
+    open_doors_check(m);
     
-    open_doors_check(m)
 
     local stepResult = perform_ground_step(m)
     if (stepResult == GROUND_STEP_LEFT_GROUND) then
@@ -59,6 +59,7 @@ local function act_cyn_run(m)
         tilt_body_walking(m, startYaw);
     else
         m.marioBodyState.torsoAngle.x = 0
+        m.marioBodyState.torsoAngle.z = 0
     end
     m.marioBodyState.allowPartRotation = 1
     return 0;
@@ -136,7 +137,7 @@ local function act_cyn_roll(m)
     if e.actionTick == 0 then
         mario_set_forward_vel(m, e.lastSpeed + 10)
         set_mario_animation(m, CHAR_ANIM_FORWARD_SPINNING)
-        e.rollEndTimer = 10
+        e.rollEndTimer = 5
     end
 
 
@@ -147,19 +148,24 @@ local function act_cyn_roll(m)
 
     mario_set_forward_vel(m, e.lastSpeed)
     spawn_particle(m, PARTICLE_DUST)
-    apply_slope_accel(m)
+    update_cyn_roll_speed(m)
 
-    m.faceAngle.y = m.intendedYaw - approach_s32(intendedYawbutcoolig, 0, 0x1000, 0x1000)
-
-    if not buttonZdown or m.forwardVel < 10 then
+    if m.forwardVel <= 29 then
         e.rollEndTimer = e.rollEndTimer - 1
     else
-        e.rollEndTimer = 10
+        e.rollEndTimer = 5
+    end
+
+    if not buttonZdown then
+        e.rollEndTimer = 0
     end
 
     if e.rollEndTimer <= 0 then
+        if mag < 1 then
         set_mario_action(m, ACT_BRAKING, 0)
         return
+        end
+        set_mario_action(m, ACT_CYN_RUN, 0)
     end
 
     set_backflip_or_long_jump(m)
@@ -190,10 +196,11 @@ local function act_cyn_dive(m)
 
     if m.actionTimer == 0 then
         play_character_sound(m, CHAR_SOUND_HOOHOO)
+        m.faceAngle.y = m.intendedYaw
     end
 
-    m.vel.y = -40
-    m.forwardVel = 50
+    m.vel.y = -80
+    m.forwardVel = 80
 
     common_air_action_step(m, ACT_CYN_ROLL, CHAR_ANIM_SLIDE_DIVE, AIR_STEP_NONE)
 
@@ -229,6 +236,16 @@ local function do_spin_ground_if(m)
     end
 end
 
+local function do_dive_if(m)
+    init_locals(m)
+
+    if e.actionTick > 0 and m.action ~= ACT_CYN_DIVE  then
+        if buttonZpress then
+            set_mario_action(m, ACT_CYN_DIVE, 0)
+        end
+    end
+end
+
 local function before_action_cynix(m)
     init_locals(m)
 
@@ -241,6 +258,7 @@ local function before_action_cynix(m)
     if m.action == ACT_WALKING then
         set_mario_action(m, ACT_CYN_RUN, 0)
     end
+
 end
 
 local function update_cynix(m)
@@ -257,7 +275,7 @@ local function update_cynix(m)
 
     e.lastSpeed = get_current_speed(m)
     local isGrounded = is_grounded(m)
-    djui_chat_message_create("isGrounded: " .. tostring(isGrounded))
+    --djui_chat_message_create("isGrounded: " .. tostring(isGrounded))
 
     -- spin cooldown thing
     if e.spinCooldown > 0 then
@@ -276,6 +294,7 @@ local function update_cynix(m)
 
     if not isGrounded then
         do_spin_air_if(m)
+        do_dive_if(m)
     end
 
     if m.action == ACT_BACKFLIP then
@@ -287,8 +306,6 @@ local function update_cynix(m)
         if e.actionTick == 0 then
             m.forwardVel = m.forwardVel + 10
         end
-
-        make_actionable_air(m)
     end
 
     if m.action == ACT_LONG_JUMP_LAND then
@@ -297,17 +314,9 @@ local function update_cynix(m)
         end
     end
 
-    if m.action == ACT_GROUND_POUND then
-        if buttonBpress then
-            m.faceAngle.y = m.intendedYaw
-            set_mario_action(m, ACT_CYN_DIVE, 0)
-        end
-    end
 
     if m.action == ACT_DIVE then
-        if buttonZdown then
-            set_mario_action(m, ACT_CYN_DIVE, 0)
-        end
+        do_dive_if(m)
     end
 
 end

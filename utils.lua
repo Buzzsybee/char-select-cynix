@@ -9,6 +9,7 @@ function reset_cynix_states(index)
         prevFrameAction = 0,
         spinCooldown = 0,
         canSpin = true,
+        canDive = true,
         rollEndTimer = 0,
         lastSpeed = 0,
 
@@ -23,19 +24,6 @@ for i = 0, (MAX_PLAYERS - 1) do
 end
 
 c = gMarioStates[0] -- c for Cynix
-
-isWaterAct = {
-    [ACT_WATER_IDLE] = true,
-    [ACT_WATER_ACTION_END] = true,
-    [ACT_WATER_THROW] = true,
-    [ACT_WATER_PUNCH] = true,
-    [ACT_WATER_PLUNGE] = true,
-    [ACT_HOLD_BREASTSTROKE] = true,
-    [ACT_FLAG_SWIMMING ] = true,
-    [ACT_HOLD_SWIMMING_END] = true,
-    [ACT_FLAG_SWIMMING_OR_FLYING ] = true,
-}
-isSwimming = isWaterAct[c.action] 
 
 function convert_s16(num)
     local min = -32768
@@ -94,12 +82,12 @@ function make_actionable_air(m)
 end
 
 -- i copied this from honiOM, no idea how it works fr, let me burn
-function apply_traction_friction(m)
+function apply_traction_friction(m, normalSpeed, tractionFactor)
     init_locals(m)
-    local normalSpeed = 34
+    local normalSpeed = normalSpeed or 34
     local stickMag = (m.controller and m.controller.stickMag and (m.controller.stickMag / 64)) or 0
 
-    local traction = 0.03
+    local traction = tractionFactor or 0.03
 
     if stickMag > 0.15 then
         traction = traction * 0.25
@@ -141,6 +129,7 @@ function init_locals(m)
     e = gCynixStates[m.playerIndex]
     mag = m.controller.stickMag / 64
     intendedYawbutcoolig = s16(m.intendedYaw - m.faceAngle.y)
+    action = c.action 
 end
 
 function set_backflip_or_long_jump(m)
@@ -174,11 +163,41 @@ function update_cyn_run_speed(m)
     init_locals(m)
     local maxTargetSpeed = 0.0;
     local targetSpeed = 0.0;
-    apply_traction_friction(m);
+    apply_traction_friction(m, 34, 0.07);
     if (m.floor ~= nil and m.floor.type == SURFACE_SLOW) then
         maxTargetSpeed = e.lastSpeed;
     else
         maxTargetSpeed = e.lastSpeed;
+    end
+
+    if (m.intendedMag < maxTargetSpeed) then
+        targetSpeed = m.intendedMag + 2.1;
+    else
+        targetSpeed = maxTargetSpeed
+    end
+
+    if (m.forwardVel <= 0.0) then
+        m.forwardVel = m.forwardVel + 2.1;
+    elseif (m.forwardVel <= targetSpeed) then
+        m.forwardVel = m.forwardVel + 2.1;
+    end
+
+    m.faceAngle.y = m.intendedYaw - approach_s32(intendedYawbutcoolig, 0, 0x1000, 0x1000)
+
+    apply_slope_accel(m);
+end
+
+function update_cyn_roll_speed(m)
+    init_locals(m)
+    local maxTargetSpeed = 0.0;
+    local targetSpeed = 0.0;
+    if e.actionTick > 20 then
+        apply_traction_friction(m, 10, 0.07);
+    end
+    if (m.floor ~= nil and m.floor.type == SURFACE_SLOW) then
+        maxTargetSpeed = e.lastSpeed - 10;
+    else
+        maxTargetSpeed = e.lastSpeed - 10;
     end
 
     if (m.intendedMag < maxTargetSpeed) then
