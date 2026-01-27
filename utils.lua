@@ -85,22 +85,15 @@ end
 function apply_traction_friction(m, normalSpeed, tractionFactor)
     init_locals(m)
     local normalSpeed = normalSpeed or 34
-    local stickMag = (m.controller and m.controller.stickMag and (m.controller.stickMag / 64)) or 0
+    local stickMag = m.controller.stickMag
 
     local traction = tractionFactor or 0.03
 
-    if stickMag > 0.15 then
+    if stickMag > 25 then
         traction = traction * 0.25
     end
 
-    local applyWhenLowInputFrames = 20
-    if (m.floor ~= nil and stickMag < 1.0) then
-        e.groundFrictionTimer = (e.groundFrictionTimer or 0) + 1
-    else
-        e.groundFrictionTimer = 0
-    end
-
-    if (m.floor ~= nil and (m.forwardVel > normalSpeed or e.groundFrictionTimer > applyWhenLowInputFrames)) then
+    if (m.floor ~= nil and (m.forwardVel > normalSpeed)) then
         local delta = m.forwardVel - normalSpeed
         if delta > 0.01 then
             m.forwardVel = m.forwardVel - (delta * traction)
@@ -167,7 +160,7 @@ function update_cyn_run_speed(m)
     if (m.floor ~= nil and m.floor.type == SURFACE_SLOW) then
         maxTargetSpeed = e.lastSpeed;
     else
-        maxTargetSpeed = e.lastSpeed;
+        maxTargetSpeed = 34 or e.lastSpeed;
     end
 
     if (m.intendedMag < maxTargetSpeed) then
@@ -177,9 +170,9 @@ function update_cyn_run_speed(m)
     end
 
     if (m.forwardVel <= 0.0) then
-        m.forwardVel = m.forwardVel + 2.1;
+        m.forwardVel = m.forwardVel + 5.1;
     elseif (m.forwardVel <= targetSpeed) then
-        m.forwardVel = m.forwardVel + 2.1;
+        m.forwardVel = m.forwardVel + 5.1;
     end
 
     m.faceAngle.y = m.intendedYaw - approach_s32(intendedYawbutcoolig, 0, 0x1000, 0x1000)
@@ -191,13 +184,13 @@ function update_cyn_roll_speed(m)
     init_locals(m)
     local maxTargetSpeed = 0.0;
     local targetSpeed = 0.0;
-    if e.actionTick > 20 then
-        apply_traction_friction(m, 10, 0.07);
+    if e.actionTick > 10 then
+        apply_traction_friction(m, 10, 0.1);
     end
     if (m.floor ~= nil and m.floor.type == SURFACE_SLOW) then
-        maxTargetSpeed = e.lastSpeed - 10;
+        maxTargetSpeed = e.lastSpeed;
     else
-        maxTargetSpeed = e.lastSpeed - 10;
+        maxTargetSpeed = e.lastSpeed;
     end
 
     if (m.intendedMag < maxTargetSpeed) then

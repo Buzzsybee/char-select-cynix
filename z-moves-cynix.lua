@@ -101,7 +101,7 @@ local function act_cyn_spin(m)
         set_jump_from_landing(m)
     end
 end
-hook_mario_action(ACT_CYN_SPIN, { every_frame = act_cyn_spin, gravity = nil }, INT_PUNCH)
+hook_mario_action(ACT_CYN_SPIN, { every_frame = act_cyn_spin, gravity = nil }, INT_KICK)
 
 local function act_cyn_spin_air(m)
     init_locals(m)
@@ -249,6 +249,7 @@ end
 local function before_action_cynix(m)
     init_locals(m)
 
+
     if m.action == ACT_CYN_ROLL then
         if e.actionTick == 0 then
             mario_set_forward_vel(m, e.lastSpeed + m.vel.y)
@@ -259,10 +260,17 @@ local function before_action_cynix(m)
         set_mario_action(m, ACT_CYN_RUN, 0)
     end
 
+    prevFrameSpeed = e.lastSpeed
+
 end
 
 local function update_cynix(m)
     init_locals(m)
+
+    local stickMag = m.controller.stickMag
+
+    --djui_chat_message_create("mag: " .. tostring(stickMag))
+
 
     m.peakHeight = m.pos.y
 
