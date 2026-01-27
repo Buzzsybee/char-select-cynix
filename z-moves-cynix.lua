@@ -101,7 +101,7 @@ local function act_cyn_spin(m)
         set_jump_from_landing(m)
     end
 end
-hook_mario_action(ACT_CYN_SPIN, { every_frame = act_cyn_spin, gravity = nil })
+hook_mario_action(ACT_CYN_SPIN, { every_frame = act_cyn_spin, gravity = nil }, INT_PUNCH)
 
 local function act_cyn_spin_air(m)
     init_locals(m)
