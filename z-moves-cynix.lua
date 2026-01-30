@@ -145,12 +145,15 @@ local function act_cyn_roll(m)
     if (stepResult == GROUND_STEP_LEFT_GROUND) then
         set_mario_action(m, ACT_CYN_ROLL_FALL, 0);
     end
+    if (stepResult == GROUND_STEP_HIT_WALL) then
+        set_mario_action(m, ACT_GROUND_BONK, 0)
+    end
 
     mario_set_forward_vel(m, e.lastSpeed)
     spawn_particle(m, PARTICLE_DUST)
     update_cyn_roll_speed(m)
 
-    if m.forwardVel <= 29 then
+    if m.forwardVel < 36 then
         e.rollEndTimer = e.rollEndTimer - 1
     else
         e.rollEndTimer = 5
@@ -324,6 +327,10 @@ local function update_cynix(m)
 
 
     if m.action == ACT_DIVE then
+        if e.actionTick == 0 then
+            m.forwardVel = (m.forwardVel + 20) or e.lastSpeed
+        end
+
         do_dive_if(m)
     end
 
