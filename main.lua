@@ -9,7 +9,8 @@ if not _G.charSelectExists then
 end
 
 local E_MODEL_CYNIX = smlua_model_util_get_id("cynix_geo")   -- Located in "actors"
--- local TEX_ICON_CYNIX = get_texture_info("honi-icon")
+local TEX_ICON_CYNIX = get_texture_info("cyn_icon")
+local CYN_GRAFFITI = get_texture_info("cynix_graffiti")
 
 anims = {
     [charSelect.CS_ANIM_MENU] = "CYN_MENU_ANIM",
@@ -44,3 +45,4 @@ CHAR_CYNIX = _G.charSelect.character_add(
 )
 
 charSelect.character_add_animations(E_MODEL_CYNIX, anims)
+charSelect.character_add_graffiti(CHAR_CYNIX, CYN_GRAFFITI)
