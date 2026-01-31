@@ -73,6 +73,8 @@ local function act_cyn_spin(m)
         
         set_mario_animation(m, CHAR_ANIM_TWIRL)
         e.spinCooldown = 15
+
+    else set_turn_speed(0x800)
     end
 
     local stepResult = perform_ground_step(m)
@@ -81,8 +83,6 @@ local function act_cyn_spin(m)
         set_character_animation(m, CHAR_ANIM_GENERAL_FALL);
     end
     mario_set_forward_vel(m, e.lastSpeed)
-    set_turn_speed(0x1000);
-
 
     e.canSpin = false
     spawn_particle(m, PARTICLE_SPARKLES)
@@ -110,14 +110,19 @@ local function act_cyn_spin_air(m)
         mario_set_forward_vel(m, e.lastSpeed)
         m.vel.y = 40
         play_character_sound(m, CHAR_SOUND_YAHOO)
+        if m.prevAction == ACT_GROUND_POUND then 
+            m.faceAngle.y = m.intendedYaw 
+            if mag > 0 then m.forwardVel = 34 end
+        end
+
+    else set_turn_speed(0x500);
     end
 
-    common_air_action_step(m, ACT_FREEFALL_LAND, CHAR_ANIM_TWIRL, AIR_STEP_NONE)
+    local stepres = common_air_action_step(m, ACT_FREEFALL_LAND, CHAR_ANIM_TWIRL, AIR_STEP_NONE)
+    if stepres == AIR_STEP_HIT_WALL then return set_mario_action(m, ACT_BACKWARD_AIR_KB, 0) end
 
     make_actionable_air(m)
-
-    set_turn_speed(0x500);
-
+    
     e.canSpin = false
 
     e.gfxAngleY = e.gfxAngleY + 0x2900
@@ -213,9 +218,11 @@ local function act_cyn_dive(m)
 
     m.actionTimer = m.actionTimer + 1
 
-    if m.actionTimer < 10 then
-        spawn_particle(m, PARTICLE_SPARKLES)
-    end
+    
+    spawn_particle(m, PARTICLE_SPARKLES)
+
+    if not buttonZdown then set_mario_action(m, ACT_FREEFALL, 0) end
+
 end
 hook_mario_action(ACT_CYN_DIVE, { every_frame = act_cyn_dive })
 
@@ -297,10 +304,11 @@ local function update_cynix(m)
         e.canSpin = true
     end
 
-    if isGrounded and (m.action ~= ACT_CYN_SPIN or (m.action ~= ACT_CYN_SPIN_AIR)) then
+    if isGrounded and (m.action ~= ACT_CYN_SPIN) then
         e.canSpin = true
-
-        do_spin_ground_if(m)
+        if not excludeGroundSpinAct[m.action] then
+            do_spin_ground_if(m)    
+        end
     end
 
     if jumpAct[m.action] and e.actionTick > 0 then
