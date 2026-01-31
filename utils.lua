@@ -86,6 +86,10 @@ excludeGroundSpinActs = {
     ACT_DISAPPEARED,
     ACT_TELEPORT_FADE_IN,
     ACT_TELEPORT_FADE_OUT,
+    ACT_ENTERING_STAR_DOOR,
+    ACT_HARD_BACKWARD_GROUND_KB,
+    ACT_HARD_FORWARD_GROUND_KB,
+    ACT_SPECIAL_DEATH_EXIT,
 }
 excludeGroundSpinAct = {}
 for _, v in ipairs(excludeGroundSpinActs) do
