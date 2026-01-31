@@ -37,8 +37,6 @@ local function act_cyn_run(m)
 
     vec3f_copy(startPos, m.pos);
     update_cyn_run_speed(m);
-    open_doors_check(m);
-    
 
     local stepResult = perform_ground_step(m)
     if (stepResult == GROUND_STEP_LEFT_GROUND) then
@@ -305,11 +303,8 @@ local function update_cynix(m)
         do_spin_ground_if(m)
     end
 
-    if not isGrounded then
-        do_dive_if(m)
-    end
-
     if jumpAct[m.action] and e.actionTick > 0 then
+        do_dive_if(m)
         do_spin_air_if(m)
     end
 

@@ -38,6 +38,12 @@ jumpActs = {
     ACT_WATER_JUMP,
     ACT_DIVE,
     ACT_STEEP_JUMP,
+    ACT_FORWARD_ROLLOUT,
+    ACT_BACKWARD_ROLLOUT,
+    ACT_TOP_OF_POLE_JUMP,
+    ACT_GROUND_POUND,
+    ACT_SPAWN_SPIN_AIRBORNE,
+    ACT_SPAWN_NO_SPIN_AIRBORNE,
 }
 jumpAct = {}
 for _, v in ipairs(jumpActs) do
@@ -230,43 +236,35 @@ function update_cyn_roll_speed(m)
     end
 
     set_turn_speed(0x1000);
-    
+
     apply_slope_accel(m);
 end
 
-
-function open_doors_check(m)
-  
-    local dist = 150
-    local doorwarp = obj_get_nearest_object_with_behavior_id(m.marioObj, id_bhvDoorWarp)
-    local door = obj_get_nearest_object_with_behavior_id(m.marioObj, id_bhvDoor)
-    local stardoor = obj_get_nearest_object_with_behavior_id(m.marioObj, id_bhvStarDoor)
-    local shell = obj_get_nearest_object_with_behavior_id(m.marioObj, id_bhvKoopaShell)
-    
-    if m.action == ACT_WALKING or m.action == ACT_HOLD_WALKING then
-        if
-        ((doorwarp ~= nil and dist_between_objects(m.marioObj, doorwarp) > dist) or
-        (door ~= nil and dist_between_objects(m.marioObj, door) > dist) or
-        (stardoor ~= nil and dist_between_objects(m.marioObj, stardoor) > dist) or (dist_between_objects(m.marioObj, shell) > dist and shell ~= nil) and m.heldObj == nil)
-        then
-            return set_mario_action(m, ACT_CYN_RUN, 0)
-        elseif doorwarp == nil and door == nil and stardoor == nil and shell == nil then
-            return set_mario_action(m, ACT_CYN_RUN, 0)
+--from baconators lua recreation of act walkinggg
+function fix_interactions(m, obj, interactType)
+    if (m.action == ACT_CYN_RUN) then
+        if (interactType == INTERACT_WARP_DOOR) then
+            m.action = ACT_WALKING
+            local interaction = interact_warp_door(m, INTERACT_WARP_DOOR, obj)
+            if (interaction == 0) then
+                m.action = ACT_CYN_RUN
+            end
         end
-    end
-    
-    if m.action == ACT_CYN_RUN then
-        if
-        (dist_between_objects(m.marioObj, doorwarp) < dist and doorwarp ~= nil) or
-        (dist_between_objects(m.marioObj, door) < dist and door ~= nil) or
-        (dist_between_objects(m.marioObj, stardoor) < dist and stardoor ~= nil) or (dist_between_objects(m.marioObj, shell) < dist and shell ~= nil)
-        then
-          if m.heldObj == nil then
-            return set_mario_action(m, ACT_WALKING, 0)
-            else
-              return set_mario_action(m, ACT_HOLD_WALKING, 0)
-          end
-        
+        if (interactType == INTERACT_DOOR) then
+            m.action = ACT_WALKING
+            local interaction = interact_door(m, INTERACT_DOOR, obj)
+            if (interaction == 0) then
+                m.action = ACT_CYN_RUN
+            end
+        end
+        if (interactType == INTERACT_KOOPA_SHELL) then
+            m.action = ACT_WALKING
+            local interaction = interact_koopa_shell(m, INTERACT_KOOPA_SHELL, obj)
+            if (interaction == 0) then
+                m.action = ACT_CYN_RUN
+            end
         end
     end
 end
+
+hook_event(HOOK_ALLOW_INTERACT, fix_interactions)
