@@ -25,6 +25,26 @@ end
 
 c = gMarioStates[0] -- c for Cynix
 
+jumpActs = {
+    ACT_JUMP,
+    ACT_DOUBLE_JUMP,
+    ACT_TRIPLE_JUMP,
+    ACT_BACKFLIP,
+    ACT_SIDE_FLIP,
+    ACT_LONG_JUMP,
+    ACT_WALL_KICK_AIR,
+    ACT_JUMP_KICK,
+    ACT_FREEFALL,
+    ACT_WATER_JUMP,
+    ACT_DIVE,
+    ACT_STEEP_JUMP,
+}
+jumpAct = {}
+for _, v in ipairs(jumpActs) do
+    jumpAct[v] = true
+end
+
+
 function convert_s16(num)
     local min = -32768
     local max = 32767
@@ -152,6 +172,10 @@ function reset_pitch(m)
 end
 hook_event(HOOK_ON_SET_MARIO_ACTION, reset_pitch)
 
+function set_turn_speed(speed)
+    c.faceAngle.y = c.intendedYaw - approach_s32(intendedYawbutcoolig, 0, speed, speed)
+end
+
 function update_cyn_run_speed(m)
     init_locals(m)
     local maxTargetSpeed = 0.0;
@@ -175,7 +199,7 @@ function update_cyn_run_speed(m)
         m.forwardVel = m.forwardVel + 5.1;
     end
 
-    m.faceAngle.y = m.intendedYaw - approach_s32(intendedYawbutcoolig, 0, 0x1000, 0x1000)
+    set_turn_speed(0x1000);
 
     apply_slope_accel(m);
 end
@@ -205,8 +229,8 @@ function update_cyn_roll_speed(m)
         m.forwardVel = m.forwardVel + 2.1;
     end
 
-    m.faceAngle.y = m.intendedYaw - approach_s32(intendedYawbutcoolig, 0, 0x1000, 0x1000)
-
+    set_turn_speed(0x1000);
+    
     apply_slope_accel(m);
 end
 

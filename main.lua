@@ -11,6 +11,13 @@ end
 local E_MODEL_CYNIX = smlua_model_util_get_id("cynix_geo")   -- Located in "actors"
 -- local TEX_ICON_CYNIX = get_texture_info("honi-icon")
 
+anims = {
+    [charSelect.CS_ANIM_MENU] = "CYN_MENU_ANIM",
+    [CHAR_ANIM_IDLE_HEAD_CENTER] = 'CYN_MENU_ANIM',
+    [CHAR_ANIM_IDLE_HEAD_LEFT]   = 'CYN_MENU_ANIM',
+    [CHAR_ANIM_IDLE_HEAD_RIGHT]  = 'CYN_MENU_ANIM',
+}
+
 local PALETTE_CYNIX = {
     [PANTS]  = "807AB4",
     [SHIRT]  = "7460DA",
@@ -21,8 +28,7 @@ local PALETTE_CYNIX = {
     [CAP]    = "FF2751",
 	[EMBLEM] = "FFFFFF"
 }
-
-    _G.charSelect.character_add_palette_preset(E_MODEL_CYNIX, PALETTE_CYNIX)
+_G.charSelect.character_add_palette_preset(E_MODEL_CYNIX, PALETTE_CYNIX)
 
 
 CHAR_CYNIX = _G.charSelect.character_add(
@@ -36,3 +42,5 @@ CHAR_CYNIX = _G.charSelect.character_add(
     1,                  -- Camera Scale
     0                   -- Vertical Offset
 )
+
+charSelect.character_add_animations(E_MODEL_CYNIX, anims)

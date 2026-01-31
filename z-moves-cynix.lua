@@ -82,6 +82,8 @@ local function act_cyn_spin(m)
         set_mario_action(m, ACT_FREEFALL, 0);
         set_character_animation(m, CHAR_ANIM_GENERAL_FALL);
     end
+    mario_set_forward_vel(m, e.lastSpeed)
+    set_turn_speed(0x1000);
 
 
     e.canSpin = false
@@ -116,7 +118,7 @@ local function act_cyn_spin_air(m)
 
     make_actionable_air(m)
 
-    m.faceAngle.y = m.faceAngle.y
+    set_turn_speed(0x500);
 
     e.canSpin = false
 
@@ -304,8 +306,11 @@ local function update_cynix(m)
     end
 
     if not isGrounded then
-        do_spin_air_if(m)
         do_dive_if(m)
+    end
+
+    if jumpAct[m.action] and e.actionTick > 0 then
+        do_spin_air_if(m)
     end
 
     if m.action == ACT_BACKFLIP then
